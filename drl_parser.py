@@ -10,7 +10,7 @@ class SetEncoder(json.JSONEncoder):
 			return 'CustomSomethingRepresentation'
 		return json.JSONEncoder.default(self, obj)
 
-class ComplexEncoder(json.JSONEncoder):
+class DrillParserEncoder(json.JSONEncoder):
 	def default(self, obj):
 		dict = {'DrillParser': 'DrillGroups'}
 		if isinstance(obj, DrillParser):
@@ -32,7 +32,7 @@ class ComplexEncoder(json.JSONEncoder):
 				pass
 			else:
 				for items in iteraable:
-					ret_list.append({'x': items[0], 'y': items[1]})
+					ret_list.append([items[0], items[1]])
 				return {'number':obj.number, 'diameter':obj.diameter, 'drill': list(ret_list)}
 				# return list(iterable)
 				
@@ -58,7 +58,7 @@ class DrillParser:
 		try:			
 			with open(self.outputfile, 'w') as f:
 				try:
-					json.dump(self, f, cls=ComplexEncoder, indent=4)
+					json.dump(self, f, cls=DrillParserEncoder, indent=4)
 					#f.write(self.results)
 				except Exception as e:
 					print "Could not write data to %s" %(self.outputfile)
@@ -86,9 +86,8 @@ def main():
 	for items in obj.drillgroup:
 		print len(items.drill)
 
-	# print json.dumps(obj, separators=(',', ':'), cls=ComplexEncoder, indent=4) 
+	print json.dumps(obj.drillgroup[0], cls=DrillParserEncoder, indent=4) 
 	obj.writeJsonToFile() 
-	print len(obj.drillgroup[1].drill)
 
 if __name__ == '__main__':
 	main()
