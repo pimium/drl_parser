@@ -1,5 +1,6 @@
 import re
 import json
+import argparse
 from drill_group import DrillGroup 
 
 class SetEncoder(json.JSONEncoder):
@@ -38,15 +39,38 @@ class DrillParserEncoder(json.JSONEncoder):
 				
 		return json.JSONEncoder.default(self, obj)
 
+def getParmeters():
 
+	parser = argparse.ArgumentParser(version="1.0", description="Script to parse drl-files")
+	parser.add_argument("-V", "--verbose", action="store_true", default=False, help="verbose")
+	
+	parser.add_argument("-if","--inputfile", action="store", default="",  dest="inputfile", help="input filepath")
+	
+	parser.add_argument("-of","--outputfile", action="store", default="", dest="outputfile", help="output filepath")
+		
+	args = parser.parse_args()
+
+	return args
 
 class DrillParser:
-	def __init__(self, drillgroup=[], outputfile="for_znc.js"):
+	def __init__(self, drillgroup=[], inputfile="drl_test.drl", outputfile="", config=getParmeters()):
 
 		self.drillgroup = drillgroup
 		self.outputfile = outputfile
-
+		self.inputfile  = inputfile
+		self.config = config
 		
+		if config != None :
+			if(config.inputfile):
+				self.inputfile = config.inputfile
+
+			if(config.outputfile):
+				self.outputfile = config.outputfile
+
+		if self.outputfile == "":
+			self.outputfile = self.inputfile + ".js"
+
+
 	def __str__(self):
 		test = '{ "data": \n['
 		for items in self.drillgroup:
@@ -67,14 +91,14 @@ class DrillParser:
 
 def main():
 	obj = DrillParser()
-	with open("drl_test.drl", "r") as file:
+	with open(obj.inputfile, "r") as file:
 		for line in file: 
 			if (re.match('^[T]{1}\d+C\d+.\d+', line)):
 				m = re.search('^[T]{1}(.+?)C', line)
 				if m:
 					found = m.group(1)
 					# print "Found: " + found
-					dg = DrillGroup("drl_test.drl", found)
+					dg = DrillGroup(obj.inputfile, found)
 					dg.diameter = re.findall(r'C(\d+\.\d+)?', line)[0]
 					obj.drillgroup.append(dg)
 				# print line,
