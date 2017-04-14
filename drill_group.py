@@ -35,9 +35,9 @@ class DrillGroup:
 						stop_reading = 1
 						break
 					else:
-						if (re.match('[X][+-]?\d+.\d+[Y][+-]?\d+.\d+', line)):
-							x = re.search('[X]([+-]?\d+.\d+)', line)
-							y = re.search('[Y]([+-]?\d+.\d+)', line)
+						if (re.match('[X][+-]?\d*.\d*[Y][+-]?\d*.\d*', line)):
+							x = re.search('[X]([+-]?\d*.\d*)', line)
+							y = re.search('[Y]([+-]?\d*.\d*)', line)
 							if x:
 								x = x.group(1) 
 							if y:

@@ -93,13 +93,13 @@ def main():
 	obj = DrillParser()
 	with open(obj.inputfile, "r") as file:
 		for line in file: 
-			if (re.match('^[T]{1}\d+C\d+.\d+', line)):
-				m = re.search('^[T]{1}(.+?)C', line)
+			if (re.match('^[T]\d+C\d*.\d*', line)):
+				m = re.search('^[T](.+?)C', line)
 				if m:
 					found = m.group(1)
 					# print "Found: " + found
 					dg = DrillGroup(obj.inputfile, found)
-					dg.diameter = re.findall(r'C(\d+\.\d+)?', line)[0]
+					dg.diameter = re.findall(r'C(\d*\.\d*)?', line)[0]
 					obj.drillgroup.append(dg)
 				# print line,
 	print obj
