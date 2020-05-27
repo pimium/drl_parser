@@ -1,6 +1,7 @@
 import re
 import json
 import argparse
+import os.path
 
 from decimal import Decimal
 
@@ -76,12 +77,41 @@ class DrillParser:
         if self.outputfile == "":
             self.outputfile = self.inputfile + ".js"
 
+        self.header = "M48\n" \
+                      "G21\n" \
+                      "G90\n" \
+                      "G05\n"
+
     def __str__(self):
         test = '{ "data": \n['
         for items in self.drillgroup:
             test = test + items.__str__()
         test = test + ']}\n'
         return test
+
+    def print_to_DRL_file(self):
+        outputfile_ = os.path.splitext(self.inputfile)[0]
+        for dg in self.drillgroup:
+            outputfile = outputfile_ + "_T" + str(dg.number) + ".drl"
+            print(outputfile)
+            try:
+                with open(outputfile, 'w') as f:
+                    try:
+                        f.write(";Drill file for T" + str(dg.number) + ": " + str(dg.diameter))
+                        f.write(self.header)
+                        for drill_point in dg.drill:
+                            f.write("G00Z1\n")
+                            f.write("G00 X%.3fY%.3f\n" % (drill_point[0], drill_point[1]))
+                            f.write("G91Z-1F100\n")
+                            f.write("G91Z1F100\n")
+
+                        f.write("G00 X0Y0Z1F100\n")
+                        f.close()
+                        pass
+                    except Exception as e:
+                        print("Could not write data to the file: %s" % outputfile)
+            except IOError:
+                print("Could not open file ", outputfile)
 
     def writeJsonToFile(self):
         try:
@@ -127,17 +157,18 @@ def main():
                 m = re.search('^[T](.+?)C', line)
                 if m:
                     found = m.group(1)
-                    # print "Found: " + found
+                    # print("Found: " + found)
                     dg = DrillGroup(obj.inputfile, found)
                     dg.diameter = re.findall(r'C(\d*\.\d*)?', line)[0]
                     obj.drillgroup.append(dg)
-            # print line,
+    #        print(line)
     print(obj)
     for items in obj.drillgroup:
         print(len(items.drill))
         items.parse()
 
     obj.adjust_coordinate()
+    obj.print_to_DRL_file()
 
 
 # for items in obj.drillgroup:

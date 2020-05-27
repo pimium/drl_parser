@@ -26,12 +26,12 @@ class DrillGroup:
 					break
 				if (start_reading == 0):
 					if (re.match('T'+self.number+'\s', line)):	
-						print(line),
+						#print(line),
 						start_reading = 1
 				elif start_reading:
 					if (re.match('T\d\s', line)):
-						print("\nEXIT\n"),
-						print(line)
+						# print("\nEXIT\n"),
+						# print(line)
 						stop_reading = 1
 						break
 					else:
