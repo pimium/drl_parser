@@ -79,8 +79,7 @@ class DrillParser:
 
         self.header = "M48\n" \
                       "G21\n" \
-                      "G90\n" \
-                      "G05\n"
+                      "G90\n"
 
     def __str__(self):
         test = '{ "data": \n['
@@ -92,20 +91,22 @@ class DrillParser:
     def print_to_DRL_file(self):
         outputfile_ = os.path.splitext(self.inputfile)[0]
         for dg in self.drillgroup:
-            outputfile = outputfile_ + "_T" + str(dg.number) + ".drl"
+            outputfile = outputfile_ + "_T" + str(dg.number) + ".gcode"
             print(outputfile)
             try:
                 with open(outputfile, 'w') as f:
                     try:
-                        f.write(";Drill file for T" + str(dg.number) + ": " + str(dg.diameter))
+                        f.write(";Drill file for T%s: %s\n" %(str(dg.number), str(dg.diameter)))
                         f.write(self.header)
+                        f.write("G90 Z1F100\n")
                         for drill_point in dg.drill:
-                            f.write("G00Z1\n")
-                            f.write("G00 X%.3fY%.3f\n" % (drill_point[0], drill_point[1]))
-                            f.write("G91Z-1F100\n")
-                            f.write("G91Z1F100\n")
+                            #f.write("G91 Z1\n")
+                            f.write("G90 X%.3fY%.3f\n" % (drill_point[0], drill_point[1]))
+                            f.write("G91 Z-4F100\n")
+                            f.write("G90 Z1F100\n")
 
-                        f.write("G00 X0Y0Z1F100\n")
+                        f.write("G90 X0Y0Z1\n")
+                        f.write("G90 Z0F100\n")
                         f.close()
                         pass
                     except Exception as e:
