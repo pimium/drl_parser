@@ -80,6 +80,11 @@ class DrillParser:
         self.header = "M48\n" \
                       "G21\n" \
                       "G90\n"
+        self.header_1 = "M48\n"\
+        ";DRILL file {KiCad 5.0.2-bee76a0~70~ubuntu16.04.1} date Mi 27 Mai 2020 05:29:56 CEST\n"\
+        ";FORMAT={-:-/ absolute / metric / decimal}\n"\
+        "FMAT,2\n"\
+        "METRIC,TZ\n" 
 
     def __str__(self):
         test = '{ "data": \n['
@@ -88,7 +93,32 @@ class DrillParser:
         test = test + ']}\n'
         return test
 
-    def print_to_DRL_file(self):
+    def print_to_drl_file(self):
+        outputfile_ = os.path.splitext(self.inputfile)[0]
+        outputfile = outputfile_ + "_Adj.drl"
+
+        try:
+            with open(outputfile, 'w') as f:
+                print("print_to_drl_file: ", outputfile)
+                # f.write(self.header)
+
+                f.write(self.header_1)
+                
+                for dg in self.drillgroup:
+                    f.write("T%sC%s\n" % (dg.number, dg.diameter))
+
+                f.write("%\nG90\nG05\n")
+                                
+                for dg in self.drillgroup:
+                    f.write("T%s\n" % dg.number)
+                    for dp in dg.drill:
+                        f.write("X%.3fY%.3f\n" % dp)
+                f.write("T0\nM30\n")
+                f.close()
+        except IOError:
+            print("Could not open file ", outputfile)
+
+    def print_to_gcode_file(self):
         outputfile_ = os.path.splitext(self.inputfile)[0]
         for dg in self.drillgroup:
             outputfile = outputfile_ + "_T" + str(dg.number) + ".gcode"
@@ -102,7 +132,7 @@ class DrillParser:
                         for drill_point in dg.drill:
                             #f.write("G91 Z1\n")
                             f.write("G90 X%.3fY%.3f\n" % (drill_point[0], drill_point[1]))
-                            f.write("G91 Z-4F100\n")
+                            f.write("G91 Z-5F100\n")
                             f.write("G90 Z1F100\n")
 
                         f.write("G90 X0Y0Z1\n")
@@ -169,7 +199,8 @@ def main():
         items.parse()
 
     obj.adjust_coordinate()
-    obj.print_to_DRL_file()
+    obj.print_to_gcode_file()
+    obj.print_to_drl_file()
 
 
 # for items in obj.drillgroup:
